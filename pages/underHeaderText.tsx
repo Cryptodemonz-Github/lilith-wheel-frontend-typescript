@@ -19,7 +19,6 @@ class UnderHeaderText extends React.Component<Props> {
   render() {
     return (
       <>
-        <br />
         {this.props.connected ? (
           <>
             {this.props.placedBet ? (

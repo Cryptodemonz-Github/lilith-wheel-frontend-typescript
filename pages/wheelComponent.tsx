@@ -24,7 +24,9 @@ const wait = async (props: any) => {
   props.setIsEnded(true);
 };
 
-interface Props {}
+interface Props {
+  size: any;
+}
 
 function WheelComponent(props: any) {
   const animations = useSpring(
@@ -52,30 +54,46 @@ function WheelComponent(props: any) {
 
   return (
     <>
-      <Container fluid>
-        <Container fluid>
-          <Stack anchor="top">
-            <animated.div
-              style={{
-                width: 390,
-                height: 390,
-                borderRadius: 16,
-                ...animations,
-              }}
-            >
-              <Image src={wheelImg} width="390px" height="390px" />
-            </animated.div>
-
-            <Box
-              height="100px"
-              width="40px"
-              margin={{ top: "-20px", left: "10px" }}
-            >
-              <Image className="marker" src={markerImg} />
-            </Box>
-          </Stack>
-        </Container>
-      </Container>
+      <>
+        {props.size === "large" && (
+          <animated.div
+            style={{
+              width: 400,
+              height: 400,
+              borderRadius: 16,
+              ...animations,
+            }}
+          >
+            <Image src={wheelImg} height="400px" width="400px" />
+          </animated.div>
+        )}
+      </>
+      <>
+        {props.size === "medium" && (
+          <animated.div
+            style={{
+              width: 250,
+              height: 250,
+              borderRadius: 16,
+              ...animations,
+            }}
+          >
+            <Image src={wheelImg} height="250px" width="250px" />
+          </animated.div>
+        )}
+      </>
+      <>
+        {props.size === "small" && (
+          <animated.div
+            style={{
+              borderRadius: 16,
+              ...animations,
+            }}
+          >
+            <Image src={wheelImg} height="300px" width="300px" />
+          </animated.div>
+        )}
+      </>
     </>
   );
 }

@@ -1,8 +1,8 @@
-import { Box } from "grommet";
+import { Box, GridSizeType } from "grommet";
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import { grommet } from "grommet/themes";
-import { Grommet, Heading } from "grommet";
+import { Grommet, Grid, ResponsiveContext } from "grommet";
 import "../styles/Home.module.css";
 import { deepMerge } from "grommet/utils";
 import Web3 from "web3";
@@ -18,6 +18,7 @@ import customTheme from "../constants/style";
 import Constants from "../constants/constants";
 import logo from "../styles/assets/logo.png";
 import Image from "next/image";
+import wheelImg from "../styles/assets/wheel.png";
 
 declare let window: any;
 declare let ethereum: any;
@@ -275,45 +276,54 @@ class Home extends React.Component<Props, State> {
   render() {
     return (
       <>
-        <Container>
-          <Grommet theme={deepMerge(grommet, customTheme)}>
-            <Head>
-              <title>DEMONZ WHEEL</title>
-            </Head>
-            <div className={styles.container}>
-              <Box
-                animation={{ type: "zoomOut", duration: 2000, size: "large" }}
+        <Grommet style={{ backgroundImage: "url('background.png')" }} full>
+          <ResponsiveContext.Consumer>
+            {(size: any) => (
+              <Grid
+                fill={true}
+                pad="medium"
+                rows={["full"]}
+                columns={["auto", "flex", "auto"]}
+                gap="small"
+                areas={[
+                  { name: "left", start: [0, 0], end: [0, 0] },
+                  { name: "center", start: [1, 0], end: [1, 0] },
+                  { name: "right", start: [2, 0], end: [2, 0] },
+                ]}
               >
-                <Image src={logo} />
-              </Box>
-              <Box
-                animation={{ type: "fadeIn", duration: 1000, size: "xlarge" }}
-              >
-                <UnderHeaderText
-                  connected={this.state.connected}
-                  placedBet={this.state.placedBet}
-                  valueBet={this.state.valueBet}
-                  multiplier={this.state.multiplier}
-                />
-              </Box>
-              <div className={styles.grid}>
-                <Box direction="column" pad="medium" gap="large">
-                  <WheelComponent
-                    key={this.state.reset}
-                    isSpinning={this.state.isSpinning}
-                    setIsSpinning={this.setIsSpinning}
-                    setIsEnded={this.setIsEnded}
-                    winningMultiplier={this.state.winningMultiplier}
-                    rotateValue={this.state.rotateValue}
-                  />
-
-                  <Box
-                    animation={{
-                      type: "zoomIn",
-                      duration: 1000,
-                      size: "xlarge",
-                    }}
-                  >
+                <Box gridArea="left" />
+                <Box
+                  className="mainBox"
+                  direction="column"
+                  align="center"
+                  justify="center"
+                  alignSelf="center"
+                  gridArea="center"
+                  gap="medium"
+                >
+                  <Box>
+                    <Image src={logo} />
+                  </Box>
+                  <Box>
+                    <UnderHeaderText
+                      connected={this.state.connected}
+                      placedBet={this.state.placedBet}
+                      valueBet={this.state.valueBet}
+                      multiplier={this.state.multiplier}
+                    />
+                  </Box>
+                  <Box>
+                    <WheelComponent
+                      size={size}
+                      key={this.state.reset}
+                      isSpinning={this.state.isSpinning}
+                      setIsSpinning={this.setIsSpinning}
+                      setIsEnded={this.setIsEnded}
+                      winningMultiplier={this.state.winningMultiplier}
+                      rotateValue={this.state.rotateValue}
+                    />
+                  </Box>
+                  <Box>
                     <BottomButtons
                       placedBet={this.state.placedBet}
                       connected={this.state.connected}
@@ -325,40 +335,11 @@ class Home extends React.Component<Props, State> {
                     />
                   </Box>
                 </Box>
-                {this.state.isTxModalOpen && (
-                  <TxModal
-                    txStarted={this.state.txStarted}
-                    valueBet={this.state.valueBet}
-                    setValueBet={this.setValueBet}
-                    multiplier={this.state.multiplier}
-                    setMultiplier={this.setMultiplier}
-                    connected={this.state.connected}
-                    setConnected={this.setConnected}
-                    placeBet={this.placeBet}
-                    setTxStarted={this.setTxStarted}
-                  />
-                )}
-
-                {this.state.isEnded && (
-                  <ResultModal
-                    setValueBet={this.setValueBet}
-                    setMultiplier={this.setMultiplier}
-                    setWinningMultiplier={this.setWinningMultiplier}
-                    setPlacedBet={this.setPlacedBet}
-                    setTxStarted={this.setTxStarted}
-                    setIsEnded={this.setIsEnded}
-                    won={this.state.won}
-                    setWon={this.setWon}
-                    valueBet={this.state.valueBet}
-                    winningMultiplier={this.state.winningMultiplier}
-                    reset={this.state.reset}
-                    setReset={this.setReset}
-                  />
-                )}
-              </div>
-            </div>
-          </Grommet>
-        </Container>
+                <Box gridArea="right" />
+              </Grid>
+            )}
+          </ResponsiveContext.Consumer>
+        </Grommet>
       </>
     );
   }

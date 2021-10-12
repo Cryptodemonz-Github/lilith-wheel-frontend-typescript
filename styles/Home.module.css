@@ -1,6 +1,6 @@
 .container {
     min-height: 100vh;
-    padding: 0 0.1rem;
+  
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -35,15 +35,7 @@
   
   
    
-  .grid {
   
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    max-width: 800px;
-    margin-top: 1rem;
-  }
   
   @font-face {
     font-family: "MonoPixel-Awesome";
@@ -75,3 +67,6 @@
     max-width: 500px;
     height: auto;
   }
+
+
+ 
