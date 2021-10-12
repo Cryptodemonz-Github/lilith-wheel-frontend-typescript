@@ -233,5 +233,6 @@ contract Wheel is Ownable, VRFConsumerBase {
         delete multipliers[player];
         delete bets[player];
         delete addressToRequestId[player];
+        delete currency[player];
     }
 }
