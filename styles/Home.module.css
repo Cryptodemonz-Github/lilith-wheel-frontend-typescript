@@ -1,4 +1,4 @@
-.container {
+  .container {
     min-height: 100vh;
   
     display: flex;
@@ -34,17 +34,14 @@
   }
   
   
-   
-  
-  
   @font-face {
     font-family: "MonoPixel-Awesome";
     color: #fff;
     src: local("MonoPixel-Awesome"),
       url("./fonts/MonoPixelAwesome.ttf") format("truetype");
   
-  
   }
+ 
   .marker {
     position: absolute;
     width: 60px;

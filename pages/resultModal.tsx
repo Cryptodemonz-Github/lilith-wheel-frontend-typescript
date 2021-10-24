@@ -1,26 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useContext } from "react";
 import demonzface from "../styles/assets/demonzface.png";
 import demonzface_b from "../styles/assets/demonzface_b.png";
-import won from "../styles/assets/won.png";
+import wonPic from "../styles/assets/won.png";
 import Image from "next/image";
 import "../styles/Home.module.css";
 import { Box, Button, Text } from "grommet";
 import styled, { css } from "styled-components";
-
-interface Props {
-  setValueBet: (value: number) => void;
-  setMultiplier: (value: number) => void;
-  setWinningMultiplier: (value: number) => void;
-  setPlacedBet: (value: boolean) => void;
-  setTxStarted: (value: boolean) => void;
-  setIsEnded: (value: boolean) => void;
-  won: boolean;
-  setWon: (value: boolean) => void;
-  valueBet: number;
-  winningMultiplier: number;
-  reset: boolean;
-  setReset: (value: boolean) => void;
-}
+import { AppCtx } from "../contexts/appContext";
+import laughing_devil from "../styles/assets/laughing_devilwindow4x.gif";
 
 const ModalContainer = styled.div`
   position: absolute;
@@ -34,115 +21,99 @@ const ModalContainer = styled.div`
   backdrop-filter: blur(5px);
 `;
 
-class ResultModal extends React.Component<Props> {
-  constructor(props: Props) {
-    super(props);
-    this.newGame = this.newGame.bind(this);
-  }
+function ResultModal() {
+  const {
+    setValueBet,
+    won,
+    setMultiplier,
+    setWinningMultiplier,
+    setPlacedBet,
+    setTxStarted,
+    setIsEnded,
+    setWon,
+    setReset,
+    reset,
+    valueBet,
+    winningMultiplier,
+    setIsSpinning,
+    setIsTxModalOpen,
+    setStartSpin,
+    setTxIsDone,
+  } = useContext(AppCtx);
 
-  newGame = () => {
-    this.props.setValueBet(0);
-    this.props.setMultiplier(2);
-    this.props.setWinningMultiplier(0);
-    this.props.setPlacedBet(false);
-    this.props.setTxStarted(false);
-    this.props.setIsEnded(false);
-    this.props.setWon(false);
-    this.props.setReset(!this.props.reset);
+  const newGame = () => {
+    setValueBet(0);
+    setMultiplier(2);
+    setWinningMultiplier(0);
+    setPlacedBet(false);
+    setTxStarted(false);
+    setIsEnded(false);
+    setWon(false);
+    setReset(!reset);
+    setIsSpinning(false);
+    setIsTxModalOpen(false);
+    setStartSpin(false);
+    setTxIsDone(false);
   };
 
-  render() {
-    return (
-      <>
-        <ModalContainer>
+  return (
+    <>
+      <ModalContainer>
+        {!won ? (
           <Box
             height="medium"
             width="medium"
             pad="medium"
-            background="#000"
+            background={{ image: "url(you_lost.png)" }}
             justify="center"
             animation={{ type: "fadeIn", duration: 750, size: "xlarge" }}
+            onClick={() => newGame()}
           >
-            {!this.props.won ? (
-              <Box
-                direction="column"
-                gap="medium"
-                align="center"
-                animation={{ type: "zoomIn", duration: 500, size: "xlarge" }}
-              >
-                <Text textAlign="center" size="xxlarge">
-                  YOU LOST!
-                </Text>
-                <Image
-                  className="wheel"
-                  height="100px"
-                  width="100px"
-                  src={demonzface_b}
-                />
-
-                <Text textAlign="center" size="medium">
-                  TRY AGAIN!
-                </Text>
-
-                <Button
-                  alignSelf="center"
-                  secondary
-                  type="submit"
-                  label={
-                    <Text textAlign="center" size="large" color="#fff">
-                      NEW GAME
-                    </Text>
-                  }
-                  color="#9933FF"
-                  onClick={() => this.newGame()}
-                />
-              </Box>
-            ) : (
-              <Box
-                direction="column"
-                gap="medium"
-                align="center"
-                animation={{ type: "zoomIn", duration: 500, size: "xlarge" }}
-              >
-                <Text textAlign="center" size="xxlarge">
-                  YOU WON!
-                </Text>
-                <Image
-                  className="wheel"
-                  height="100px"
-                  width="100px"
-                  src={won}
-                />
-
-                <Text size="large">
-                  {this.props.valueBet * this.props.winningMultiplier}{" "}
-                  <Text color="#9933FF" size="large">
-                    $LLTH
-                  </Text>
-                </Text>
-                <Text textAlign="center" size="small">
-                  YOU WILL RECEIVE YOUR PRIZE WITHIN A FEW SECONDS.
-                </Text>
-
-                <Button
-                  alignSelf="center"
-                  secondary
-                  type="submit"
-                  label={
-                    <Text textAlign="center" size="large" color="#fff">
-                      NEW GAME
-                    </Text>
-                  }
-                  color="#9933FF"
-                  onClick={() => this.newGame()}
-                />
-              </Box>
-            )}
+            <Box
+              direction="column"
+              gap="medium"
+              align="center"
+              animation={{ type: "zoomIn", duration: 500, size: "xlarge" }}
+            >
+              <Image
+                className="wheel"
+                height="200px"
+                width="200px"
+                src={laughing_devil}
+              />
+            </Box>
           </Box>
-        </ModalContainer>
-      </>
-    );
-  }
+        ) : (
+          <Box
+            height="medium"
+            width="medium"
+            pad="medium"
+            background={{ image: "url(you_won.png)" }}
+            justify="center"
+            animation={{ type: "fadeIn", duration: 750, size: "xlarge" }}
+            onClick={() => newGame()}
+          >
+            <Box
+              direction="column"
+              gap="medium"
+              align="center"
+              animation={{ type: "zoomIn", duration: 500, size: "xlarge" }}
+            >
+              <Text size="large">
+                {valueBet * winningMultiplier}{" "}
+                <Text color="#fff" size="large">
+                  $LLTH
+                </Text>
+              </Text>
+              <Text textAlign="center" size="small">
+                YOU WILL RECEIVE YOUR PRIZE WITHIN A FEW SECONDS.
+              </Text>
+            </Box>
+          </Box>
+        )}
+      </ModalContainer>
+    </>
+  );
 }
 
 export default ResultModal;

@@ -14,3 +14,10 @@ a {
 * {
   box-sizing: border-box;
 }
+
+@font-face {
+  font-family: "cryptodemonzlarge";
+  color: #fff;
+  src: local("cryptodemonzlarge"),
+    url("./fonts/cryptodemonzlarge.ttf") format("truetype");
+}

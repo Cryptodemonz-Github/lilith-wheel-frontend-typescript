@@ -1,113 +1,183 @@
-import { VoidSigner } from "@ethersproject/abstract-signer";
 import {
   Box,
   RangeInput,
-  Button,
   TextInput,
   FormField,
   Text,
   Heading,
+  CheckBox,
 } from "grommet";
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import "../styles/Home.module.css";
-import WheelComponent from "./wheelComponent";
+import { SpinButton } from "../demonzUIKit/elements";
+import { AppCtx } from "../contexts/appContext";
+import { DemonzWeb3Ctx } from "../contexts/demonzWeb3Context";
+import Constants from "../constants/constants";
+import { web3Socket } from "../utils/demonzWeb3";
 
-interface Props {
-  valueBet: number;
-  setValueBet: (value: number) => void;
-  multiplier: number;
-  setMultiplier: (value: number) => void;
-  connected: boolean;
-  setConnected: (value: boolean) => void;
-  placeBet: () => void;
-  setTxStarted: (value: boolean) => void;
-  txStarted: boolean;
-}
+function PlaceBet() {
+  const {
+    setValueBet,
+    valueBet,
+    setMultiplier,
+    multiplier,
+    setTxStarted,
+    setPlacedBet,
+    setTxIsDone,
+    setCurrency,
+    currency,
+  } = useContext(AppCtx);
+  const { accounts, contractWheel, contractLLTH } = useContext(DemonzWeb3Ctx);
+  const [checkedETH, setCheckedETH] = useState(false);
+  const [checkedLLTH, setCheckedLLTH] = useState(true);
 
-class PlaceBet extends React.Component<Props> {
-  private suggestionsBet: Array<string> = [
-    "1k $LLTH",
-    "10k $LLTH",
-    "100k $LLTH",
+  const suggestionsBetLLTH: Array<string> = [
+    "1k LLTH",
+    "10k LLTH",
+    "100k LLTH",
   ];
+  const suggestionsBetETH: Array<string> = ["0.1 ETH", "0.5 ETH", "2 ETH"];
 
-  constructor(props: Props) {
-    super(props);
-  }
-
-  onSuggestionSelectBet = (event: any) => {
+  const onSuggestionSelectBetLLTH = (event: any) => {
     switch (event.suggestion) {
       case "1k $LLTH":
-        this.props.setValueBet(1000);
+        setValueBet(1000);
         break;
       case "10k $LLTH":
-        this.props.setValueBet(10000);
+        setValueBet(10000);
         break;
       case "100k $LLTH":
-        this.props.setValueBet(100000);
+        setValueBet(100000);
         break;
       default:
-        this.props.setValueBet(Number(""));
+        setValueBet(Number(""));
     }
   };
 
-  render() {
-    return (
-      <>
-        <Box
-          direction="column"
-          animation={{ type: "zoomIn", duration: 500, size: "xlarge" }}
-        >
-          <FormField name="betAmount">
+  const onSuggestionSelectBetETH = (event: any) => {
+    switch (event.suggestion) {
+      case "0.1 ETH":
+        setValueBet(0.1);
+        break;
+      case "0.5 ETH":
+        setValueBet(0.5);
+        break;
+      case "2 ETH":
+        setValueBet(2);
+        break;
+      default:
+        setValueBet(Number(""));
+    }
+  };
+
+  const placeBet = async () => {
+    setTxStarted(true);
+
+    if (
+      (await contractLLTH.methods
+        .allowance(accounts[0], Constants.GAME_ADDRESS)
+        .call()) < web3Socket.utils.toWei(valueBet.toString(), "ether")
+    ) {
+      await contractLLTH.methods
+        .approve(
+          Constants.GAME_ADDRESS,
+          web3Socket.utils.toWei(web3Socket.utils.toBN(100000000000), "ether")
+        )
+        .send({ from: accounts[0], gas: 3000000 });
+    }
+    await contractWheel.methods
+      .placeBetInLLTH(
+        web3Socket.utils.toWei(valueBet.toString(), "ether"),
+        multiplier
+      )
+      .send({ from: accounts[0], gas: 3000000 });
+
+    setTxIsDone(true);
+    setPlacedBet(true);
+  };
+
+  return (
+    <>
+      <Box
+        direction="column"
+        animation={{ type: "zoomIn", duration: 500, size: "xlarge" }}
+        gap="medium"
+      >
+        <Box justify="center" direction="row" gap="medium">
+          <CheckBox
+            label="LLTH"
+            checked={checkedLLTH}
+            onChange={(event) => {
+              setCheckedLLTH(event.target.checked);
+              setCurrency("LLTH");
+              setCheckedETH(false);
+            }}
+          />
+          <CheckBox
+            label="ETH"
+            checked={checkedETH}
+            onChange={(event) => {
+              setCheckedETH(event.target.checked);
+              setCurrency("ETH");
+              setCheckedLLTH(false);
+            }}
+          />
+        </Box>
+        <FormField name="betAmount">
+          {currency === "ETH" && (
             <TextInput
               required={true}
-              suggestions={this.suggestionsBet}
-              onSuggestionSelect={this.onSuggestionSelectBet}
+              suggestions={suggestionsBetETH}
+              onSuggestionSelect={onSuggestionSelectBetETH}
               size="small"
               name="betAmount"
               placeholder="Bet Amount"
-              value={this.props.valueBet}
-              onChange={(event) =>
-                this.props.setValueBet(Number(event.target.value))
-              }
+              value={valueBet}
+              onChange={(event) => setValueBet(Number(event.target.value))}
               icon={
-                <Text color="#9933FF" size="medium">
-                  $LLTH
+                <Text color="#562B76" size="medium">
+                  {currency}
                 </Text>
               }
               reverse
             />
-          </FormField>
-          <FormField name="autoCashOut">
-            <RangeInput
-              min="2"
-              max="13"
-              value={this.props.multiplier}
-              onChange={(value) => {
-                this.props.setMultiplier(Number(value.target.value));
-              }}
+          )}
+          {currency === "LLTH" && (
+            <TextInput
+              required={true}
+              suggestions={suggestionsBetLLTH}
+              onSuggestionSelect={onSuggestionSelectBetLLTH}
+              size="small"
+              name="betAmount"
+              placeholder="Bet Amount"
+              value={valueBet}
+              onChange={(event) => setValueBet(Number(event.target.value))}
+              icon={
+                <Text color="#562B76" size="medium">
+                  {currency}
+                </Text>
+              }
+              reverse
             />
-            <Heading color="#fff" textAlign="center">
-              {this.props.multiplier + "x"}
-            </Heading>
-          </FormField>
-
-          <Button
-            alignSelf="center"
-            secondary
-            type="submit"
-            label={
-              <Text textAlign="center" size="xlarge" color="#fff">
-                PLACE BET
-              </Text>
-            }
-            color="#9933FF"
-            onClick={() => this.props.placeBet()}
+          )}
+        </FormField>
+        <FormField name="autoCashOut">
+          <RangeInput
+            min="2"
+            max="13"
+            value={multiplier}
+            onChange={(value) => {
+              setMultiplier(Number(value.target.value));
+            }}
           />
-        </Box>
-      </>
-    );
-  }
+          <Heading color="#fff" textAlign="center">
+            {multiplier + "x"}
+          </Heading>
+        </FormField>
+        <SpinButton onClick={() => placeBet()} />
+      </Box>
+    </>
+  );
 }
 
 export default PlaceBet;

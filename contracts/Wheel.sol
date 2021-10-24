@@ -31,6 +31,12 @@ contract Wheel is Ownable, VRFConsumerBase {
     using SafeMath for uint256;
     using Address for address;
 
+    // currencies that are available for placing bets
+    enum Currency {
+        ETH,
+        LLTH
+    }
+
     // instance of $LLTH token
     IERC20 internal _LLTH;
 
@@ -65,7 +71,7 @@ contract Wheel is Ownable, VRFConsumerBase {
     mapping(bytes32 => uint256) public requestIdToRandomNumber;
 
     // mapping to find the currency of players used for betting
-    mapping(address => string) public currency;
+    mapping(address => Currency) public currency;
 
     // sending random number for front-end
     event RandomIsArrived(bytes32 requestId, uint256 randomNumber);
@@ -177,22 +183,22 @@ contract Wheel is Ownable, VRFConsumerBase {
         getRandomNumber(msg.sender);
         bets[msg.sender] = bet;
         multipliers[msg.sender] = multiplier;
-        currency[msg.sender] = "LLTH";
+        currency[msg.sender] = Currency.LLTH;
     }
 
-    function placeBetInETH(uint256 bet, uint256 multiplier) external payable {
+    function placeBetInETH(uint256 multiplier) external payable {
         require(multiplier > 1, "Multiplier must be between 2 and 13.");
         require(multiplier < 14, "Multiplier must be between 2 and 13.");
         require(
-            _LLTH.balanceOf(address(this)) >= bet.mul(multiplier),
+            _LLTH.balanceOf(address(this)) >= msg.value.mul(multiplier),
             "Not enough $LLTH token in game's wallet."
         );
-        require(msg.value == bet, "Incorrect amount of ETH was sent.");
+        //require(msg.value == 0.01 ether, "Incorrect amount of ETH was sent.");
 
         getRandomNumber(msg.sender);
-        bets[msg.sender] = bet;
+        bets[msg.sender] = msg.value;
         multipliers[msg.sender] = multiplier;
-        currency[msg.sender] = "ETH";
+        currency[msg.sender] = Currency.ETH;
     }
 
     function withdrawLLTH(uint256 amount) external onlyOwner {
@@ -215,7 +221,7 @@ contract Wheel is Ownable, VRFConsumerBase {
 
         if (multipliers[player] == getWinningMultiplier(player)) {
             uint256 amount;
-            if (currency[player] == "ETH") {
+            if (currency[player] == Currency.ETH) {
                 amount = getWinningMultiplier(msg.sender).mul(bets[player]);
             } else {
                 amount = getWinningMultiplier(msg.sender)

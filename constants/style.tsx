@@ -1,9 +1,21 @@
+import { css } from "styled-components";
+import { FormClose } from "grommet-icons";
+
 const customTheme = {
+  checkBox: {
+    color: "#562B76",
+    icons: {
+      checked: FormClose,
+    },
+  },
   rangeInput: {
     thumb: {
-      color: "#9933FF",
-      extend: `
-        border-radius: 0px;
+      elevation: "none",
+      color: "none",
+      extend: css`
+        background-image: url("slider.png");
+        height: 27px;
+        width: 45px;
       `,
     },
     track: {
@@ -23,10 +35,10 @@ const customTheme = {
       color: "#2D2102",
     },
     font: {
-      family: "MonoPixel-Awesome",
+      family: "cryptodemonzlarge",
     },
     colors: {
-      active: "#9832FE",
+      active: "#562B76",
       border: "#000",
       placeholder: "#fff",
       text: "#fff",
@@ -43,7 +55,7 @@ const customTheme = {
     drop: {
       background: "#000",
       elevation: "none",
-      hover: "#33FFFF",
+
       extend: `
               font-size: 14px;
               border-bottom-left-radius: 1px;
