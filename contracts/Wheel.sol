@@ -158,7 +158,7 @@ contract Wheel is Ownable, VRFConsumerBase {
     //-------------------------------------------------------------------------
 
     // Called by front-end when placing bet. It saves player's data and tranfers their bet to this contract's address.
-    function placeBetInLLTH(uint256 bet, uint256 multiplier) external {
+    function placeBet(uint256 bet, uint256 multiplier) external {
         require(multiplier > 1, "Multiplier must be between 2 and 13.");
         require(multiplier < 14, "Multiplier must be between 2 and 13.");
         require(
