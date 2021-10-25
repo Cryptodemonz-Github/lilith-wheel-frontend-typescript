@@ -31,12 +31,6 @@ contract Wheel is Ownable, VRFConsumerBase {
     using SafeMath for uint256;
     using Address for address;
 
-    // currencies that are available for placing bets
-    enum Currency {
-        ETH,
-        LLTH
-    }
-
     // instance of $LLTH token
     IERC20 internal _LLTH;
 
@@ -69,9 +63,6 @@ contract Wheel is Ownable, VRFConsumerBase {
 
     // mapping of requestId to the returned random number
     mapping(bytes32 => uint256) public requestIdToRandomNumber;
-
-    // mapping to find the currency of players used for betting
-    mapping(address => Currency) public currency;
 
     // sending random number for front-end
     event RandomIsArrived(bytes32 requestId, uint256 randomNumber);
@@ -183,25 +174,9 @@ contract Wheel is Ownable, VRFConsumerBase {
         getRandomNumber(msg.sender);
         bets[msg.sender] = bet;
         multipliers[msg.sender] = multiplier;
-        currency[msg.sender] = Currency.LLTH;
     }
 
-    function placeBetInETH(uint256 multiplier) external payable {
-        require(multiplier > 1, "Multiplier must be between 2 and 13.");
-        require(multiplier < 14, "Multiplier must be between 2 and 13.");
-        require(
-            _LLTH.balanceOf(address(this)) >= msg.value.mul(multiplier),
-            "Not enough $LLTH token in game's wallet."
-        );
-        //require(msg.value == 0.01 ether, "Incorrect amount of ETH was sent.");
-
-        getRandomNumber(msg.sender);
-        bets[msg.sender] = msg.value;
-        multipliers[msg.sender] = multiplier;
-        currency[msg.sender] = Currency.ETH;
-    }
-
-    function withdrawLLTH(uint256 amount) external onlyOwner {
+    function withdraw(uint256 amount) external onlyOwner {
         require(
             _LLTH.balanceOf(address(this)) >= amount,
             "Not enough $LLTH in game's wallet."
@@ -210,25 +185,16 @@ contract Wheel is Ownable, VRFConsumerBase {
         _LLTH.transfer(owner(), amount);
     }
 
-    function withdrawETH(uint256 amount) external onlyOwner {
-        require(amount <= address(this).balance, "Not enough ETH.");
-        payable(msg.sender).transfer(amount);
-    }
-
     // Transfers prize, resets mappings and array.
     function closeRound(address player) external onlyOwner {
         require(player != address(0), "Address cannot be null.");
 
         if (multipliers[player] == getWinningMultiplier(player)) {
-            uint256 amount;
-            if (currency[player] == Currency.ETH) {
-                amount = getWinningMultiplier(msg.sender).mul(bets[player]);
-            } else {
-                amount = getWinningMultiplier(msg.sender)
-                    .mul(bets[player])
-                    .mul(15)
-                    .div(10);
-            }
+            uint256 amount = getWinningMultiplier(msg.sender)
+                .mul(bets[player])
+                .mul(15)
+                .div(10);
+
             require(
                 _LLTH.balanceOf(address(this)) >= amount,
                 "Not enough $LLTH in game's wallet."
@@ -239,6 +205,5 @@ contract Wheel is Ownable, VRFConsumerBase {
         delete multipliers[player];
         delete bets[player];
         delete addressToRequestId[player];
-        delete currency[player];
     }
 }
