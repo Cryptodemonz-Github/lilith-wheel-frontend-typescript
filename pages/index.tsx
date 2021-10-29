@@ -46,7 +46,7 @@ interface State {
   isSpinning: boolean;
   isEnded: boolean;
   won: boolean;
-  reset: boolean;
+  reset: number;
   rotateValue: any;
   requestId: string;
   startSpin: boolean;
@@ -58,18 +58,19 @@ class Home extends React.Component<Props, State> {
   web3: any;
 
   rotateValues = new Map([
+    [1, 4725],
     [2, 4700], // segment: rotation
     [3, 3950],
     [4, 3550],
     [5, 4250],
     [6, 3500],
-    [7, 3820],
+    [7, 3825],
     [8, 3800],
-    [9, 3400],
-    [10, 4100],
-    [11, 3700],
-    [12, 4400],
-    [13, 3650],
+    [9, 3775],
+    [10, 3750],
+    [11, 3725],
+    [12, 3700],
+    [13, 3675],
   ]);
 
   constructor(props: Props) {
@@ -92,7 +93,7 @@ class Home extends React.Component<Props, State> {
       isSpinning: false,
       isEnded: false,
       won: true,
-      reset: false,
+      reset: 0,
       rotateValue: undefined,
       requestId: "",
       startSpin: false,
@@ -245,7 +246,7 @@ class Home extends React.Component<Props, State> {
     this.setState({ won: value });
   }
 
-  setReset(value: boolean) {
+  setReset(value: number) {
     this.setState({ reset: value });
   }
 
@@ -346,10 +347,7 @@ class Home extends React.Component<Props, State> {
                           <UnderHeaderText />
                         </Box>
                         <Box>
-                          <WheelComponent
-                            size={size}
-                            reset={this.state.reset}
-                          />
+                          <WheelComponent size={size} key={this.state.reset} />
                         </Box>
                         <Box>
                           <BottomButtons />
@@ -357,8 +355,8 @@ class Home extends React.Component<Props, State> {
                       </Box>
                       <Box gridArea="right" />
                     </Grid>
-                    {this.state.isTxModalOpen && <TxModal />}
-                    {this.state.isEnded && <ResultModal />}
+                    {this.state.isTxModalOpen && <TxModal size={size} />}
+                    {this.state.isEnded && <ResultModal size={size} />}
                   </>
                 )}
               </ResponsiveContext.Consumer>

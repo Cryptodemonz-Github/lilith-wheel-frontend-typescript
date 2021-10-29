@@ -159,10 +159,14 @@ export const RightLadyLose = (props: any) => {
   );
 };
 
-export const Marker = () => {
+export const Marker = (props: any) => {
   return (
-    <Box height="99px" width="129px" margin={{ top: "-20px", left: "10px" }}>
-      <Image src={markerImg} height="99px" width="129px" />
+    <Box
+      height={props.height}
+      width={props.width}
+      margin={{ top: "-20px", left: "10px" }}
+    >
+      <Image src={markerImg} height={props.height} width={props.width} />
     </Box>
   );
 };

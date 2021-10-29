@@ -21,7 +21,7 @@ const ModalContainer = styled.div`
   backdrop-filter: blur(5px);
 `;
 
-function ResultModal() {
+function ResultModal(props: any) {
   const {
     setValueBet,
     won,
@@ -49,7 +49,8 @@ function ResultModal() {
     setTxStarted(false);
     setIsEnded(false);
     setWon(false);
-    setReset(!reset);
+    if (reset === 0) setReset(1);
+    else setReset(0);
     setIsSpinning(false);
     setIsTxModalOpen(false);
     setStartSpin(false);
@@ -59,57 +60,116 @@ function ResultModal() {
   return (
     <>
       <ModalContainer>
-        {!won ? (
-          <Box
-            height="medium"
-            width="medium"
-            pad="medium"
-            background={{ image: "url(you_lost.png)" }}
-            justify="center"
-            animation={{ type: "fadeIn", duration: 750, size: "xlarge" }}
-            onClick={() => newGame()}
-          >
-            <Box
-              direction="column"
-              gap="medium"
-              align="center"
-              animation={{ type: "zoomIn", duration: 500, size: "xlarge" }}
-            >
-              <Image
-                className="wheel"
-                height="200px"
-                width="200px"
-                src={laughing_devil}
-              />
-            </Box>
-          </Box>
+        {props.size === "large" ? (
+          <>
+            {!won ? (
+              <Box
+                height="medium"
+                width="medium"
+                pad="medium"
+                background={{ image: "url(you_lost.png)" }}
+                justify="center"
+                animation={{ type: "fadeIn", duration: 750, size: "xlarge" }}
+                onClick={() => newGame()}
+              >
+                <Box
+                  direction="column"
+                  gap="medium"
+                  align="center"
+                  animation={{ type: "zoomIn", duration: 500, size: "xlarge" }}
+                >
+                  <Image
+                    className="wheel"
+                    height="200px"
+                    width="200px"
+                    src={laughing_devil}
+                  />
+                </Box>
+              </Box>
+            ) : (
+              <Box
+                height="medium"
+                width="medium"
+                pad="medium"
+                background={{ image: "url(you_won.png)" }}
+                justify="center"
+                animation={{ type: "fadeIn", duration: 750, size: "xlarge" }}
+                onClick={() => newGame()}
+              >
+                <Box
+                  direction="column"
+                  gap="medium"
+                  align="center"
+                  animation={{ type: "zoomIn", duration: 500, size: "xlarge" }}
+                >
+                  <Text size="large">
+                    {valueBet * winningMultiplier}{" "}
+                    <Text color="#fff" size="large">
+                      $LLTH
+                    </Text>
+                  </Text>
+                  <Text textAlign="center" size="small">
+                    YOU WILL RECEIVE YOUR PRIZE WITHIN A FEW SECONDS.
+                  </Text>
+                </Box>
+              </Box>
+            )}
+          </>
         ) : (
-          <Box
-            height="medium"
-            width="medium"
-            pad="medium"
-            background={{ image: "url(you_won.png)" }}
-            justify="center"
-            animation={{ type: "fadeIn", duration: 750, size: "xlarge" }}
-            onClick={() => newGame()}
-          >
-            <Box
-              direction="column"
-              gap="medium"
-              align="center"
-              animation={{ type: "zoomIn", duration: 500, size: "xlarge" }}
-            >
-              <Text size="large">
-                {valueBet * winningMultiplier}{" "}
-                <Text color="#fff" size="large">
-                  $LLTH
-                </Text>
-              </Text>
-              <Text textAlign="center" size="small">
-                YOU WILL RECEIVE YOUR PRIZE WITHIN A FEW SECONDS.
-              </Text>
-            </Box>
-          </Box>
+          <>
+            {!won ? (
+              <Box
+                height="250px"
+                width="250px"
+                pad="medium"
+                background={{ image: "url(you_lost.png)" }}
+                justify="center"
+                animation={{ type: "fadeIn", duration: 750, size: "xlarge" }}
+                onClick={() => newGame()}
+              >
+                <Box
+                  direction="column"
+                  gap="medium"
+                  align="center"
+                  animation={{ type: "zoomIn", duration: 500, size: "xlarge" }}
+                >
+                  <Image
+                    className="wheel"
+                    height="200px"
+                    width="200px"
+                    src={laughing_devil}
+                  />
+                </Box>
+              </Box>
+            ) : (
+              <Box
+                height="250px"
+                width="250px"
+                pad="medium"
+                background={{ image: "url(you_won.png)" }}
+                justify="center"
+                animation={{ type: "fadeIn", duration: 750, size: "xlarge" }}
+                onClick={() => newGame()}
+              >
+                <Box
+                  direction="column"
+                  gap="medium"
+                  align="center"
+                  animation={{ type: "zoomIn", duration: 500, size: "xlarge" }}
+                >
+                  <Text size="large">
+                    {valueBet * winningMultiplier}{" "}
+                    <Text color="#fff" size="large">
+                      $LLTH
+                    </Text>
+                  </Text>
+                  <Text textAlign="center" size="small">
+                    YOU WILL RECEIVE YOUR PRIZE WITHIN A FEW SECONDS.
+                  </Text>
+                </Box>
+              </Box>
+            )}
+          </>
         )}
       </ModalContainer>
     </>

@@ -22,50 +22,92 @@ const ModalContainer = styled.div`
   backdrop-filter: blur(5px);
 `;
 
-function TxModal() {
+function TxModal(props: any) {
   const { txStarted, requestId, txIsDone } = useContext(AppCtx);
 
   return (
     <ModalContainer>
-      <Box
-        height="medium"
-        width="medium"
-        pad="medium"
-        background="#000"
-        justify="center"
-        animation={{ type: "fadeIn", duration: 750, size: "xlarge" }}
-      >
-        {txStarted ? (
-          <>
-            <Box
-              direction="column"
-              gap="medium"
-              align="center"
-              animation={{ type: "fadeIn", duration: 500, size: "xlarge" }}
-            >
-              {!txIsDone ? (
-                <>
-                  <Text textAlign="center" size="xxlarge">
-                    Waiting For Transaction...
-                  </Text>
-                  <Spinner type="wheel" />
-                </>
-              ) : (
-                <>
-                  <Text textAlign="center" size="xxlarge">
-                    Loading...
-                  </Text>
-                  <Spinner type="demonBabe" />
-                </>
-              )}
-            </Box>
-          </>
-        ) : (
-          <>
-            <PlaceBet />
-          </>
-        )}
-      </Box>
+      {props.size === "large" ? (
+        <Box
+          height="medium"
+          width="medium"
+          pad="medium"
+          background="#000"
+          justify="center"
+          animation={{ type: "fadeIn", duration: 750, size: "xlarge" }}
+        >
+          {txStarted ? (
+            <>
+              <Box
+                direction="column"
+                gap="medium"
+                align="center"
+                animation={{ type: "fadeIn", duration: 500, size: "xlarge" }}
+              >
+                {!txIsDone ? (
+                  <>
+                    <Text textAlign="center" size="xxlarge">
+                      Waiting For Transaction...
+                    </Text>
+                    <Spinner type="wheel" />
+                  </>
+                ) : (
+                  <>
+                    <Text textAlign="center" size="xxlarge">
+                      Loading...
+                    </Text>
+                    <Spinner type="demonBabe" />
+                  </>
+                )}
+              </Box>
+            </>
+          ) : (
+            <>
+              <PlaceBet size={props.size} />
+            </>
+          )}
+        </Box>
+      ) : (
+        <Box
+          height="250px"
+          width="250px"
+          pad="medium"
+          background="#000"
+          justify="center"
+          animation={{ type: "fadeIn", duration: 750, size: "xlarge" }}
+        >
+          {txStarted ? (
+            <>
+              <Box
+                direction="column"
+                gap="medium"
+                align="center"
+                animation={{ type: "fadeIn", duration: 500, size: "xlarge" }}
+              >
+                {!txIsDone ? (
+                  <>
+                    <Text textAlign="center" size="xlarge">
+                      Waiting For Transaction...
+                    </Text>
+                    <Spinner type="wheel" />
+                  </>
+                ) : (
+                  <>
+                    <Text textAlign="center" size="xlarge">
+                      Loading...
+                    </Text>
+                    <Spinner type="demonBabe" />
+                  </>
+                )}
+              </Box>
+            </>
+          ) : (
+            <>
+              <PlaceBet size={props.size} />
+            </>
+          )}
+        </Box>
+      )}
     </ModalContainer>
   );
 }

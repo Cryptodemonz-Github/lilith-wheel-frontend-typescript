@@ -9,11 +9,11 @@
  *
  *  #CryptoDemonz, Wheel of Fortune
  *
- * It’s a wheel with 13 segments, each segment defines a multiplier like 2x, 3x, …, 12x, 13x, and it has a wild segment which gives a free round.
+ * It’s a wheel with 13 segments, each segment defines a value like 2, 3, …, 12, 13, and it has a wild segment which pays 0.
  * The player can place a bet and has to figure out which multiplier will be the result when the wheel is stopped.
  * After betting, the wheel starts spinning and spinning, then it stops.
- * Anyone who successfully figured out the winning multiplier where the wheel’s stopped, gets the prize: bet amount x winning multiplier.
- * Otherwise, the player loses their bet. With this ruleset players have 7.69% chance to win or at least get a new round where they can try again.
+ * Anyone who successfully figured out the winning multiplier where the wheel’s stopped, gets the prize: bet amount x 12.
+ * Otherwise, the player loses their bet.
  *
  */
 
@@ -33,6 +33,12 @@ contract Wheel is Ownable, VRFConsumerBase {
 
     // instance of $LLTH token
     IERC20 internal _LLTH;
+
+    // payout multiplier
+    uint256 public payoutMultiplier = 12;
+
+    // maximum value that can be placed as bets
+    uint256 public maxBet = 10000 ether;
 
     // minimum value of the wheel segment multiplier
     uint256 public minMultiplier = 1;
@@ -113,6 +119,14 @@ contract Wheel is Ownable, VRFConsumerBase {
         maxMultiplier = maxMultiplier_;
     }
 
+    function setMaxBet(uint256 maxBet_) external onlyOwner {
+        maxBet = maxBet_;
+    }
+
+    function setPayoutMultiplier(uint256 payoutMultiplier_) external onlyOwner {
+        payoutMultiplier = payoutMultiplier_;
+    }
+
     //-------------------------------------------------------------------------
     // RANDOM NUMBER FUNCTIONS
     //-------------------------------------------------------------------------
@@ -159,6 +173,10 @@ contract Wheel is Ownable, VRFConsumerBase {
 
     // Called by front-end when placing bet. It saves player's data and tranfers their bet to this contract's address.
     function placeBet(uint256 bet, uint256 multiplier) external {
+        require(
+            bet <= maxBet,
+            "Bet amount must be less than the max bet amount."
+        );
         require(multiplier >= 1, "Multiplier must be between 1 and 13.");
         require(multiplier < 14, "Multiplier must be between 1 and 13.");
         require(
@@ -166,29 +184,13 @@ contract Wheel is Ownable, VRFConsumerBase {
             "Not enough $LLTH token in your wallet."
         );
         require(
-            _LLTH.balanceOf(address(this)) >= bet.mul(multiplier),
+            _LLTH.balanceOf(address(this)) >= bet.mul(payoutMultiplier),
             "Not enough $LLTH token in game's wallet."
         );
 
         _LLTH.transferFrom(msg.sender, address(this), bet);
         getRandomNumber(msg.sender);
         bets[msg.sender] = bet;
-        multipliers[msg.sender] = multiplier;
-    }
-
-    function placeWild(uint256 multiplier) external {
-        require(
-            requestIdToRandomNumber[addressToRequestId[msg.sender]] == 1,
-            "Players last winning number must be 1."
-        );
-        require(multiplier >= 1, "Multiplier must be between 1 and 13.");
-        require(multiplier < 14, "Multiplier must be between 1 and 13.");
-        require(
-            _LLTH.balanceOf(address(this)) >= bets[msg.sender].mul(multiplier),
-            "Not enough $LLTH token in game's wallet."
-        );
-
-        getRandomNumber(msg.sender);
         multipliers[msg.sender] = multiplier;
     }
 
@@ -205,8 +207,11 @@ contract Wheel is Ownable, VRFConsumerBase {
     function closeRound(address player) external onlyOwner {
         require(player != address(0), "Address cannot be null.");
 
-        if (multipliers[player] == getWinningMultiplier(player)) {
-            uint256 amount = getWinningMultiplier(msg.sender).mul(bets[player]);
+        if (
+            getWinningMultiplier(player) != 1 &&
+            multipliers[player] == getWinningMultiplier(player)
+        ) {
+            uint256 amount = bets[player].mul(payoutMultiplier);
 
             require(
                 _LLTH.balanceOf(address(this)) >= amount,

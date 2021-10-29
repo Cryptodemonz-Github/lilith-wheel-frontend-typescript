@@ -12,7 +12,7 @@ interface AppContextInterface {
   isSpinning: boolean;
   isEnded: boolean;
   won: boolean;
-  reset: boolean;
+  reset: number;
   rotateValue: any;
   requestId: string;
   startSpin: boolean;
@@ -30,7 +30,7 @@ interface AppContextInterface {
   setWinningMultiplier: (value: number) => void;
   setPlacedBet: (value: boolean) => void;
   setWon: (value: boolean) => void;
-  setReset: (value: boolean) => void;
+  setReset: (value: number) => void;
   setStartSpin: (value: boolean) => void;
   setCurrency: (value: any) => void;
 }
@@ -47,7 +47,7 @@ export const AppCtx = createContext<AppContextInterface>({
   isSpinning: false,
   isEnded: false,
   won: false,
-  reset: false,
+  reset: 0,
   rotateValue: undefined,
   requestId: "",
   startSpin: false,

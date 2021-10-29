@@ -37,7 +37,7 @@ const wait = async (sec: number) => {
 
 interface Props {
   size: any;
-  reset: any;
+
   /*
   setIsSpinning: (value: boolean) => void;
   isSpinning: boolean;
@@ -65,7 +65,7 @@ function WheelComponent(props: Props) {
           to: { rotateZ: -1 * rotateValue },
           config: {
             mass: 10000,
-            duration: 15000,
+            duration: 5000,
             easing: easings.easeQuadOut,
           },
           reset: true,
@@ -110,7 +110,7 @@ function WheelComponent(props: Props) {
           <Stack>
             <Stack anchor="top">
               <Wheel width={475} height={475} animations={animations} />
-              <Marker />
+              <Marker height="99px" width="129px" />
             </Stack>
             {leftSpriteState === States.IDLE && (
               <LeftLadyIdle
@@ -181,12 +181,86 @@ function WheelComponent(props: Props) {
       </>
       <>
         {props.size === "medium" && (
-          <Wheel width={250} height={250} animations={animations} />
+          <Stack>
+            <Stack anchor="top">
+              <Wheel width={475} height={475} animations={animations} />
+              <Marker height="99px" width="129px" />
+            </Stack>
+            {leftSpriteState === States.IDLE && (
+              <LeftLadyIdle
+                height="480px"
+                width="240px"
+                marginLeft="-205px"
+                marginTop="125px"
+              />
+            )}
+            {leftSpriteState === States.SPIN && (
+              <LeftLadySpin
+                height="480px"
+                width="240px"
+                marginLeft="-205px"
+                marginTop="125px"
+              />
+            )}
+            {leftSpriteState === States.WIN && (
+              <LeftLadyWin
+                height="480px"
+                width="240px"
+                marginLeft="-205px"
+                marginTop="125px"
+              />
+            )}
+            {leftSpriteState === States.LOSE && (
+              <LeftLadyLose
+                height="480px"
+                width="240px"
+                marginLeft="-205px"
+                marginTop="125px"
+              />
+            )}
+            {rightSpriteState === States.IDLE && (
+              <RightLadyIdle
+                height="500px"
+                width="260px"
+                marginLeft="400px"
+                marginTop="105px"
+              />
+            )}
+            {rightSpriteState === States.SPIN && (
+              <RightLadySpin
+                height="500px"
+                width="260px"
+                marginLeft="400px"
+                marginTop="105px"
+              />
+            )}
+            {rightSpriteState === States.WIN && (
+              <RightLadyWin
+                height="500px"
+                width="260px"
+                marginLeft="400px"
+                marginTop="105px"
+              />
+            )}
+            {rightSpriteState === States.LOSE && (
+              <RightLadyLose
+                height="500px"
+                width="260px"
+                marginLeft="400px"
+                marginTop="105px"
+              />
+            )}
+          </Stack>
         )}
       </>
       <>
         {props.size === "small" && (
-          <Wheel width={250} height={250} animations={animations} />
+          <Stack>
+            <Stack anchor="top">
+              <Wheel width={250} height={250} animations={animations} />
+              <Marker height="49px" width="64px" />
+            </Stack>
+          </Stack>
         )}
       </>
     </>

@@ -15,7 +15,7 @@ import { DemonzWeb3Ctx } from "../contexts/demonzWeb3Context";
 import Constants from "../constants/constants";
 import { web3Socket } from "../utils/demonzWeb3";
 
-function PlaceBet() {
+function PlaceBet(props: any) {
   const {
     setValueBet,
     valueBet,
@@ -36,34 +36,17 @@ function PlaceBet() {
     "10k LLTH",
     "100k LLTH",
   ];
-  const suggestionsBetETH: Array<string> = ["0.1 ETH", "0.5 ETH", "2 ETH"];
 
   const onSuggestionSelectBetLLTH = (event: any) => {
     switch (event.suggestion) {
-      case "1k $LLTH":
+      case "1k LLTH":
         setValueBet(1000);
         break;
-      case "10k $LLTH":
+      case "10k LLTH":
         setValueBet(10000);
         break;
-      case "100k $LLTH":
+      case "100k LLTH":
         setValueBet(100000);
-        break;
-      default:
-        setValueBet(Number(""));
-    }
-  };
-
-  const onSuggestionSelectBetETH = (event: any) => {
-    switch (event.suggestion) {
-      case "0.1 ETH":
-        setValueBet(0.1);
-        break;
-      case "0.5 ETH":
-        setValueBet(0.5);
-        break;
-      case "2 ETH":
-        setValueBet(2);
         break;
       default:
         setValueBet(Number(""));
@@ -86,7 +69,7 @@ function PlaceBet() {
         .send({ from: accounts[0], gas: 3000000 });
     }
     await contractWheel.methods
-      .placeBetInLLTH(
+      .placeBet(
         web3Socket.utils.toWei(valueBet.toString(), "ether"),
         multiplier
       )
@@ -103,63 +86,23 @@ function PlaceBet() {
         animation={{ type: "zoomIn", duration: 500, size: "xlarge" }}
         gap="medium"
       >
-        <Box justify="center" direction="row" gap="medium">
-          <CheckBox
-            label="LLTH"
-            checked={checkedLLTH}
-            onChange={(event) => {
-              setCheckedLLTH(event.target.checked);
-              setCurrency("LLTH");
-              setCheckedETH(false);
-            }}
-          />
-          <CheckBox
-            label="ETH"
-            checked={checkedETH}
-            onChange={(event) => {
-              setCheckedETH(event.target.checked);
-              setCurrency("ETH");
-              setCheckedLLTH(false);
-            }}
-          />
-        </Box>
         <FormField name="betAmount">
-          {currency === "ETH" && (
-            <TextInput
-              required={true}
-              suggestions={suggestionsBetETH}
-              onSuggestionSelect={onSuggestionSelectBetETH}
-              size="small"
-              name="betAmount"
-              placeholder="Bet Amount"
-              value={valueBet}
-              onChange={(event) => setValueBet(Number(event.target.value))}
-              icon={
-                <Text color="#562B76" size="medium">
-                  {currency}
-                </Text>
-              }
-              reverse
-            />
-          )}
-          {currency === "LLTH" && (
-            <TextInput
-              required={true}
-              suggestions={suggestionsBetLLTH}
-              onSuggestionSelect={onSuggestionSelectBetLLTH}
-              size="small"
-              name="betAmount"
-              placeholder="Bet Amount"
-              value={valueBet}
-              onChange={(event) => setValueBet(Number(event.target.value))}
-              icon={
-                <Text color="#562B76" size="medium">
-                  {currency}
-                </Text>
-              }
-              reverse
-            />
-          )}
+          <TextInput
+            required={true}
+            suggestions={suggestionsBetLLTH}
+            onSuggestionSelect={onSuggestionSelectBetLLTH}
+            size="small"
+            name="betAmount"
+            placeholder="Bet Amount"
+            value={valueBet}
+            onChange={(event) => setValueBet(Number(event.target.value))}
+            icon={
+              <Text color="#562B76" size="medium">
+                {currency}
+              </Text>
+            }
+            reverse
+          />
         </FormField>
         <FormField name="autoCashOut">
           <RangeInput
@@ -171,7 +114,7 @@ function PlaceBet() {
             }}
           />
           <Heading color="#fff" textAlign="center">
-            {multiplier + "x"}
+            {multiplier}
           </Heading>
         </FormField>
         <SpinButton onClick={() => placeBet()} />
