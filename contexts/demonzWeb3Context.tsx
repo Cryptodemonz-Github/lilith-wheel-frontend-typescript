@@ -7,6 +7,7 @@ interface DemonzWeb3Interface {
   contractLLTH: any;
   setAccounts: (accounts: Array<string>) => void;
   setConnected: (connected: boolean) => void;
+  spawn: number;
 }
 
 export const DemonzWeb3Ctx = createContext<DemonzWeb3Interface>({
@@ -16,4 +17,5 @@ export const DemonzWeb3Ctx = createContext<DemonzWeb3Interface>({
   contractLLTH: undefined,
   setAccounts: () => undefined,
   setConnected: () => undefined,
+  spawn: 0,
 });

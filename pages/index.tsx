@@ -52,6 +52,7 @@ interface State {
   startSpin: boolean;
   txIsDone: boolean;
   currency: string;
+  spawn: number;
 }
 
 class Home extends React.Component<Props, State> {
@@ -99,6 +100,7 @@ class Home extends React.Component<Props, State> {
       startSpin: false,
       txIsDone: false,
       currency: "LLTH",
+      spawn: 0,
     };
     this.setIsSpinning = this.setIsSpinning.bind(this);
     this.setIsEnded = this.setIsEnded.bind(this);
@@ -115,6 +117,7 @@ class Home extends React.Component<Props, State> {
     this.setStartSpin = this.setStartSpin.bind(this);
     this.setTxIsDone = this.setTxIsDone.bind(this);
     this.setCurrency = this.setCurrency.bind(this);
+    this.setSpawn = this.setSpawn.bind(this);
   }
 
   requestAccounts = async () => {
@@ -172,7 +175,11 @@ class Home extends React.Component<Props, State> {
             ),
             isTxModalOpen: false,
           });
-          if (this.state.multiplier === event.returnValues.randomNumber) {
+          console.log("this.state.multiplier", this.state.multiplier);
+          if (
+            Number(this.state.multiplier) ===
+            Number(event.returnValues.randomNumber)
+          ) {
             this.setState({ won: true });
           } else {
             this.setState({ won: false });
@@ -185,23 +192,7 @@ class Home extends React.Component<Props, State> {
     } else {
       this.setState({ connected: false });
     }
-
-    this.init();
   }
-
-  closeRound = async () => {
-    const tx = await this.state.contractWheel.methods.closeRound(
-      this.state.accounts[0]
-    );
-    await send(web3Socket, this.state.owner, tx);
-  };
-
-  init = async () => {
-    if (this.state.placedBet) {
-    } else if (this.state.isSpinning) {
-      await this.closeRound();
-    }
-  };
 
   setIsSpinning(value: boolean) {
     this.setState({ isSpinning: value });
@@ -262,6 +253,10 @@ class Home extends React.Component<Props, State> {
     this.setState({ currency: value });
   }
 
+  setSpawn(value: number) {
+    this.setState({ spawn: value });
+  }
+
   render() {
     return (
       <>
@@ -273,6 +268,7 @@ class Home extends React.Component<Props, State> {
             contractLLTH: this.state.contractLLTH,
             setAccounts: this.setAccounts,
             setConnected: this.setConnected,
+            spawn: this.state.spawn,
           }}
         >
           <AppCtx.Provider

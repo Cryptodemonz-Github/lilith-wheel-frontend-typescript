@@ -14,6 +14,7 @@ import { AppCtx } from "../contexts/appContext";
 import { DemonzWeb3Ctx } from "../contexts/demonzWeb3Context";
 import Constants from "../constants/constants";
 import { web3Socket } from "../utils/demonzWeb3";
+import { spawn } from "child_process";
 
 function PlaceBet(props: any) {
   const {
@@ -71,7 +72,8 @@ function PlaceBet(props: any) {
     await contractWheel.methods
       .placeBet(
         web3Socket.utils.toWei(valueBet.toString(), "ether"),
-        multiplier
+        multiplier,
+        spawn
       )
       .send({ from: accounts[0], gas: 3000000 });
 

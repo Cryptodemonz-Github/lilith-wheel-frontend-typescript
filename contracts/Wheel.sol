@@ -38,10 +38,10 @@ contract Wheel is Ownable, VRFConsumerBase {
     uint256 public payoutMultiplier = 12;
 
     // maximum value that can be placed as bets
-    uint256 public maxBet = 10000 ether;
+    uint256 public maxBet = 100000 * 10**18;
 
     // minimum value of the wheel segment multiplier
-    uint256 public minMultiplier = 1;
+    uint256 public minMultiplier = 1; // 1 - WILD
 
     // maximum value of the wheel segment multiplier
     uint256 public maxMultiplier = 13;
@@ -69,6 +69,12 @@ contract Wheel is Ownable, VRFConsumerBase {
 
     // mapping of requestId to the returned random number
     mapping(bytes32 => uint256) public requestIdToRandomNumber;
+
+    // mapping of requestId to player's address
+    mapping(bytes32 => address) public requestIdToAddress;
+
+    // mapping to player's spawn holdings (Spawn1 - 1, Spawn2 - 2, Spawn - 3)
+    mapping(address => uint256) public addressToSpawn;
 
     // sending random number for front-end
     event RandomIsArrived(bytes32 requestId, uint256 randomNumber);
@@ -128,43 +134,41 @@ contract Wheel is Ownable, VRFConsumerBase {
     }
 
     //-------------------------------------------------------------------------
-    // RANDOM NUMBER FUNCTIONS
+    // INTERNAL FUNCTIONS
     //-------------------------------------------------------------------------
 
-    function getRandomNumber(address player) internal {
-        require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK.");
-        bytes32 requestId = requestRandomness(keyHash, fee);
-        addressToRequestId[player] = requestId;
+    // Transfers prize, resets mappings and array.
+    function closeRound(address player) internal {
+        require(player != address(0), "Address cannot be null.");
 
-        emit RequestIdIsCreated(player, requestId);
-    }
+        if (
+            getWinningMultiplier(player) != 1 &&
+            multipliers[player] == getWinningMultiplier(player)
+        ) {
+            uint256 amount;
 
-    function fulfillRandomness(bytes32 requestId, uint256 randomness)
-        internal
-        override
-    {
-        uint256 randomNumber = (randomness %
-            (maxMultiplier.add(1) - minMultiplier)) + minMultiplier; // random number between 1 and 13
-        requestIdToRandomNumber[requestId] = randomNumber;
-
-        emit RandomIsArrived(requestId, randomNumber);
-    }
-
-    function getWinningMultiplier(address player)
-        public
-        view
-        returns (uint256)
-    {
-        require(
-            requestIdToRandomNumber[addressToRequestId[player]] > 1,
-            "Random number must be between 2 and 13."
-        );
-        require(
-            requestIdToRandomNumber[addressToRequestId[player]] < 14,
-            "Random number must be between 2 and 13."
-        );
-
-        return requestIdToRandomNumber[addressToRequestId[player]];
+            if (addressToSpawn[player] == 1) {
+                amount = bets[player].mul(payoutMultiplier).mul(1100).div(1000); // Spawn1 - 1.1x
+            } else if (addressToSpawn[player] == 2) {
+                amount = bets[player].mul(payoutMultiplier).mul(1200).div(1000); // Spawn2 - 1.2x
+            } else if (addressToSpawn[player] == 3) {
+                amount = bets[player].mul(payoutMultiplier).mul(1300).div(1000); // Spawn3 - 1.3x
+            } else {
+                amount = bets[player].mul(payoutMultiplier);
+            }
+            require(
+                _LLTH.balanceOf(address(this)) >= amount,
+                "Not enough $LLTH in game's wallet."
+            );
+            _LLTH.transfer(player, amount);
+            delete multipliers[player];
+            delete bets[player];
+            delete addressToRequestId[player];
+        } else {
+            delete multipliers[player];
+            delete bets[player];
+            delete addressToRequestId[player];
+        }
     }
 
     //-------------------------------------------------------------------------
@@ -172,7 +176,11 @@ contract Wheel is Ownable, VRFConsumerBase {
     //-------------------------------------------------------------------------
 
     // Called by front-end when placing bet. It saves player's data and tranfers their bet to this contract's address.
-    function placeBet(uint256 bet, uint256 multiplier) external {
+    function placeBet(
+        uint256 bet,
+        uint256 multiplier,
+        uint256 spawn
+    ) external {
         require(
             bet <= maxBet,
             "Bet amount must be less than the max bet amount."
@@ -187,6 +195,9 @@ contract Wheel is Ownable, VRFConsumerBase {
             _LLTH.balanceOf(address(this)) >= bet.mul(payoutMultiplier),
             "Not enough $LLTH token in game's wallet."
         );
+        require(spawn < 4, "Spawn must be less than 4.");
+
+        addressToSpawn[msg.sender] = spawn;
 
         _LLTH.transferFrom(msg.sender, address(this), bet);
         getRandomNumber(msg.sender);
@@ -203,27 +214,46 @@ contract Wheel is Ownable, VRFConsumerBase {
         _LLTH.transfer(owner(), amount);
     }
 
-    // Transfers prize, resets mappings and array.
-    function closeRound(address player) external onlyOwner {
-        require(player != address(0), "Address cannot be null.");
+    //-------------------------------------------------------------------------
+    // RANDOM NUMBER FUNCTIONS
+    //-------------------------------------------------------------------------
 
-        if (
-            getWinningMultiplier(player) != 1 &&
-            multipliers[player] == getWinningMultiplier(player)
-        ) {
-            uint256 amount = bets[player].mul(payoutMultiplier);
+    function getRandomNumber(address player) internal {
+        require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK.");
+        bytes32 requestId = requestRandomness(keyHash, fee);
+        addressToRequestId[player] = requestId;
+        requestIdToAddress[requestId] = player;
 
-            require(
-                _LLTH.balanceOf(address(this)) >= amount,
-                "Not enough $LLTH in game's wallet."
-            );
-            _LLTH.transfer(player, amount);
-            delete multipliers[player];
-            delete bets[player];
-            delete addressToRequestId[player];
-        } else if (multipliers[player] == getWinningMultiplier(player)) {
-            delete multipliers[player];
-            delete addressToRequestId[player];
-        }
+        emit RequestIdIsCreated(player, requestId);
+    }
+
+    function fulfillRandomness(bytes32 requestId, uint256 randomness)
+        internal
+        override
+    {
+        uint256 randomNumber = (randomness %
+            (maxMultiplier.add(1) - minMultiplier)) + minMultiplier; // random number between 1 and 13
+        requestIdToRandomNumber[requestId] = randomNumber;
+
+        closeRound(requestIdToAddress[requestId]);
+
+        emit RandomIsArrived(requestId, randomNumber);
+    }
+
+    function getWinningMultiplier(address player)
+        public
+        view
+        returns (uint256)
+    {
+        require(
+            requestIdToRandomNumber[addressToRequestId[player]] >= 1,
+            "Random number must be between 1 and 13."
+        );
+        require(
+            requestIdToRandomNumber[addressToRequestId[player]] < 14,
+            "Random number must be between 1 and 13."
+        );
+
+        return requestIdToRandomNumber[addressToRequestId[player]];
     }
 }

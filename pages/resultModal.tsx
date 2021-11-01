@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import demonzface from "../styles/assets/demonzface.png";
 import demonzface_b from "../styles/assets/demonzface_b.png";
 import wonPic from "../styles/assets/won.png";
@@ -8,6 +8,7 @@ import { Box, Button, Text } from "grommet";
 import styled, { css } from "styled-components";
 import { AppCtx } from "../contexts/appContext";
 import laughing_devil from "../styles/assets/laughing_devilwindow4x.gif";
+import { DemonzWeb3Ctx } from "../contexts/demonzWeb3Context";
 
 const ModalContainer = styled.div`
   position: absolute;
@@ -40,6 +41,7 @@ function ResultModal(props: any) {
     setStartSpin,
     setTxIsDone,
   } = useContext(AppCtx);
+  const { spawn } = useContext(DemonzWeb3Ctx);
 
   const newGame = () => {
     setValueBet(0);
@@ -56,6 +58,10 @@ function ResultModal(props: any) {
     setStartSpin(false);
     setTxIsDone(false);
   };
+
+  useEffect(() => {
+    console.log("WON", won);
+  }, []);
 
   return (
     <>
@@ -103,7 +109,10 @@ function ResultModal(props: any) {
                   animation={{ type: "zoomIn", duration: 500, size: "xlarge" }}
                 >
                   <Text size="large">
-                    {valueBet * winningMultiplier}{" "}
+                    {spawn === 0 && valueBet * 12}
+                    {spawn === 1 && (valueBet * 12 * 1.1).toFixed(2)}
+                    {spawn === 2 && (valueBet * 12 * 1.2).toFixed(2)}
+                    {spawn === 3 && (valueBet * 12 * 1.3).toFixed(2)}{" "}
                     <Text color="#fff" size="large">
                       $LLTH
                     </Text>

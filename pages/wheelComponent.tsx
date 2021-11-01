@@ -65,7 +65,7 @@ function WheelComponent(props: Props) {
           to: { rotateZ: -1 * rotateValue },
           config: {
             mass: 10000,
-            duration: 5000,
+            duration: 15000,
             easing: easings.easeQuadOut,
           },
           reset: true,
