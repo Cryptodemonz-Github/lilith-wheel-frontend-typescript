@@ -21,6 +21,7 @@ import Constants from "../constants/constants";
 import Web3 from "web3";
 import { contractWheelWS } from "../utils/demonzWeb3";
 import ResultModal from "./resultModal";
+import { getSpawnVersion } from "../utils/demonzWeb3";
 
 declare let window: any;
 declare let ethereum: any;
@@ -136,6 +137,7 @@ class Home extends React.Component<Props, State> {
   };
 
   componentDidMount() {
+    console.log("result", getSpawnVersion(this.state.accounts[0]));
     this.requestAccounts();
     this.setState({
       contractWheel: new this.web3.eth.Contract(

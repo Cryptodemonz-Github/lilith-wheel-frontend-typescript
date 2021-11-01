@@ -1,6 +1,7 @@
 import "../styles/globals.css";
 import type { AppProps } from "next/app";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Web3 from "web3";
 
 declare let window: any;
 declare let ethereum: any;

@@ -26,19 +26,20 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol";
+import "./LLTH.sol";
 
 contract Wheel is Ownable, VRFConsumerBase {
     using SafeMath for uint256;
     using Address for address;
 
     // instance of $LLTH token
-    IERC20 internal _LLTH;
+    LLTH internal _LLTH;
 
     // payout multiplier
     uint256 public payoutMultiplier = 12;
 
     // maximum value that can be placed as bets
-    uint256 public maxBet = 100000 * 10**18;
+    uint256 public maxBet = 10000 * 10**18;
 
     // minimum value of the wheel segment multiplier
     uint256 public minMultiplier = 1; // 1 - WILD
@@ -53,10 +54,10 @@ contract Wheel is Ownable, VRFConsumerBase {
     bytes32 public keyHash;
 
     // the address of the smart contract which verifies if the numbers returned from Chainlink are actually random
-    address public VRFCoordinator = 0x8C7382F9D8f56b33781fE506E897a4F1e2d17255;
+    address public VRFCoordinator = 0x3d2341ADb2D31f1c5530cDC622016af293177AE0;
 
     // LINK token's address
-    address public LINKToken = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;
+    address public LINKToken = 0xb0897686c545045aFc77CF20eC7A532E3120E0F1;
 
     // bets of players
     mapping(address => uint256) public bets;
@@ -87,8 +88,8 @@ contract Wheel is Ownable, VRFConsumerBase {
     //-------------------------------------------------------------------------
 
     constructor(address LLTH_) VRFConsumerBase(VRFCoordinator, LINKToken) {
-        _LLTH = IERC20(LLTH_);
-        keyHash = 0x6e75b569a01ef56d18cab6a8e71e6600d6ce853834d4a5748b720d06f878b3a4;
+        _LLTH = LLTH(LLTH_);
+        keyHash = 0xf86195cf7690c55907b2b611ebb7343a6f649bff128701cc542f0569e2c549da;
         fee = 0.0001 * 10**18; // 0.0001 LINK
     }
 
@@ -114,7 +115,7 @@ contract Wheel is Ownable, VRFConsumerBase {
     //-------------------------------------------------------------------------
 
     function setLLTH(address LLTH_) external onlyOwner {
-        _LLTH = IERC20(LLTH_);
+        _LLTH = LLTH(LLTH_);
     }
 
     function setMinMultiplier(uint256 minMultiplier_) external onlyOwner {
@@ -156,11 +157,9 @@ contract Wheel is Ownable, VRFConsumerBase {
             } else {
                 amount = bets[player].mul(payoutMultiplier);
             }
-            require(
-                _LLTH.balanceOf(address(this)) >= amount,
-                "Not enough $LLTH in game's wallet."
-            );
-            _LLTH.transfer(player, amount);
+
+            _LLTH.mint(player, amount);
+
             delete multipliers[player];
             delete bets[player];
             delete addressToRequestId[player];
@@ -191,17 +190,25 @@ contract Wheel is Ownable, VRFConsumerBase {
             _LLTH.balanceOf(address(msg.sender)) >= bet,
             "Not enough $LLTH token in your wallet."
         );
-        require(
-            _LLTH.balanceOf(address(this)) >= bet.mul(payoutMultiplier),
-            "Not enough $LLTH token in game's wallet."
-        );
         require(spawn < 4, "Spawn must be less than 4.");
 
         addressToSpawn[msg.sender] = spawn;
-
         _LLTH.transferFrom(msg.sender, address(this), bet);
+
+        uint256 amount;
+        // fee
+        if (spawn == 1) {
+            amount = bet.mul(970).div(1000); // Spawn1 - 3%
+        } else if (spawn == 2) {
+            amount = bet.mul(980).div(1000); // Spawn2 - 2%
+        } else if (spawn == 3) {
+            amount = bet.mul(990).div(1000); // Spawn3 - 1%
+        } else {
+            amount = bet.mul(960).div(1000); // Non-holder - 4%
+        }
+
         getRandomNumber(msg.sender);
-        bets[msg.sender] = bet;
+        bets[msg.sender] = amount;
         multipliers[msg.sender] = multiplier;
     }
 
